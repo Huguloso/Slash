@@ -2,6 +2,7 @@
 
 
 #include "Items/Item.h"
+#include "Slash/Slash.h"
 
 AItem::AItem()
 {
@@ -11,11 +12,11 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+	DRAW_SPHERE(GetActorLocation());
 }
 
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("AItem::Tick"));
 }
 
