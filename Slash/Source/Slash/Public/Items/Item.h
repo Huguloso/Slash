@@ -19,9 +19,18 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	float RunningTime;
+	UFUNCTION(BlueprintPure)
+	float TransformedSin() const;
+	UFUNCTION(BlueprintPure)
+	float TransformedCos() const;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Amplitude = 0.25f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimeConstant = 5.0f;
+
+private:
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float RunningTime;
 	
 };

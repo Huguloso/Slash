@@ -18,16 +18,22 @@ void AItem::BeginPlay()
 
 }
 
+float AItem::TransformedSin() const
+{
+	return FMath::Sin(RunningTime * TimeConstant) * Amplitude;
+}
+
+float AItem::TransformedCos() const
+{
+	return FMath::Cos(RunningTime * TimeConstant) * Amplitude;
+}
+
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	RunningTime += DeltaTime;
-
-	float DeltaZ = FMath::Sin(RunningTime * TimeConstant) * Amplitude;
 	
-	AddActorWorldOffset(FVector(0, 0, DeltaZ));
-		
 	DRAW_SPHERE_SingleFrame(GetActorLocation());
 	DRAW_LINE_SingleFrame(GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 100);
 }
