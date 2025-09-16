@@ -21,7 +21,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void MoveForward(float Value);
+
 private:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCapsuleComponent> CapsuleComponent;	
+	TObjectPtr<UCapsuleComponent> CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USkeletalMeshComponent> BirdMesh;
 };
