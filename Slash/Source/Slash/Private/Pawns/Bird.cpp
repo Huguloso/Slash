@@ -3,6 +3,8 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ABird::ABird()
 {
@@ -17,6 +19,13 @@ ABird::ABird()
 	BirdMesh->SetupAttachment(GetRootComponent());
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(GetRootComponent());
+	SpringArm->TargetArmLength = 300;
+	
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
 }
 
 void ABird::BeginPlay()
@@ -34,9 +43,20 @@ void ABird::BeginPlay()
 
 void ABird::Move(const FInputActionValue& Value)
 {
+	const float DirectionValue = Value.Get<float>();
+	if (Controller && DirectionValue != 0)
+	{
+		AddMovementInput(GetActorForwardVector(), DirectionValue);
+	}
+}
+
+void ABird::Rotate(const FInputActionValue& Value)
+{
+	const FVector Rotation = Value.Get<FVector>();
 	if (Controller)
 	{
-		AddMovementInput(Value.Get<FVector>());
+		AddControllerYawInput(Rotation.X);
+		AddControllerPitchInput(Rotation.Y);
 	}
 }
 
@@ -52,5 +72,6 @@ void ABird::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABird::Move);
+		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ABird::Rotate);
 	}
 }
