@@ -26,6 +26,9 @@ ABird::ABird()
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
 }
 
 void ABird::BeginPlay()
@@ -52,7 +55,7 @@ void ABird::Move(const FInputActionValue& Value)
 
 void ABird::Rotate(const FInputActionValue& Value)
 {
-	const FVector Rotation = Value.Get<FVector>();
+	const FVector2D Rotation = Value.Get<FVector2D>();
 	if (Controller)
 	{
 		AddControllerYawInput(Rotation.X);
