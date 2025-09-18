@@ -4,14 +4,23 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GroomComponent.h"
 
 ASlashCharacter::ASlashCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0, 400, 0);
+	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 300;
@@ -19,9 +28,11 @@ ASlashCharacter::ASlashCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
+	Hair = CreateDefaultSubobject<UGroomComponent>(TEXT("Hair"));
+	Hair->SetupAttachment(GetMesh(), FName("headSocket"));
+
+	Eyebrows = CreateDefaultSubobject<UGroomComponent>(TEXT("Eyebrows"));
+	Eyebrows->SetupAttachment(GetMesh(), FName("headSocket"));
 }
 
 void ASlashCharacter::BeginPlay()
@@ -40,9 +51,14 @@ void ASlashCharacter::BeginPlay()
 void ASlashCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementValue = Value.Get<FVector2D>();
+	const FRotator ControlRotation = GetControlRotation();
+	const FRotator YawRotation(0, ControlRotation.Yaw, 0);
 
-	AddMovementInput(GetActorForwardVector(), MovementValue.Y);
-	AddMovementInput(GetActorRightVector(), MovementValue.X);
+	const FVector DirectionForward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(DirectionForward, MovementValue.Y);
+
+	const FVector DirectionRight = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(DirectionRight, MovementValue.X);
 }
 
 void ASlashCharacter::Rotate(const FInputActionValue& Value)

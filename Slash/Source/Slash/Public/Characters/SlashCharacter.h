@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "SlashCharacter.generated.h"
 
+class UGroomComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UInputAction;
@@ -43,4 +44,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
+
+	UPROPERTY(VisibleAnywhere, Category = "Hair")
+	TObjectPtr<UGroomComponent> Hair;
+
+	UPROPERTY(VisibleAnywhere, Category = "Hair")
+	TObjectPtr<UGroomComponent> Eyebrows;
 };
