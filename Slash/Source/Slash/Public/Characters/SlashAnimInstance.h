@@ -23,4 +23,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float GroundSpeed;
+	UPROPERTY(BlueprintReadOnly)
+	bool IsFalling;
 };

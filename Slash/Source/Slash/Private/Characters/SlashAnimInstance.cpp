@@ -23,5 +23,6 @@ void USlashAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (SlashCharacterMovement)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(SlashCharacterMovement->Velocity);
+		IsFalling = SlashCharacterMovement->IsFalling();
 	}
 }
