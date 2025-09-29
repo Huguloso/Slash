@@ -71,6 +71,10 @@ void ASlashCharacter::Rotate(const FInputActionValue& Value)
 	}
 }
 
+void ASlashCharacter::EKeyPressed(const FInputActionValue& Value)
+{
+}
+
 void ASlashCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -85,6 +89,7 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedPlayerInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Move);
 		EnhancedPlayerInput->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Rotate);
 		EnhancedPlayerInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Jump);
+		EnhancedPlayerInput->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASlashCharacter::EKeyPressed);
 	}
 }
 

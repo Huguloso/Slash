@@ -28,6 +28,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
+	void EKeyPressed(const FInputActionValue& Value);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> InputMappingContext;
@@ -40,6 +41,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> EquipAction;
 
 private:
 	UPROPERTY(VisibleAnywhere)
