@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "SlashCharacter.generated.h"
 
+class AItem;
 class UGroomComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -22,6 +23,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,4 +60,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Hair")
 	TObjectPtr<UGroomComponent> Eyebrows;
+
+	UPROPERTY(VisibleInstanceOnly)
+	TObjectPtr<AItem> OverlappingItem;
 };
