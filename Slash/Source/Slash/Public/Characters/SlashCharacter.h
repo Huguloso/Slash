@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterTypes.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "SlashCharacter.generated.h"
@@ -25,7 +26,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
-
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -49,6 +51,8 @@ protected:
 	TObjectPtr<UInputAction> EquipAction;
 
 private:
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
 

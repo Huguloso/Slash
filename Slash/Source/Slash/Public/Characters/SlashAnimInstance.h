@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterTypes.h"
 #include "Animation/AnimInstance.h"
 #include "SlashAnimInstance.generated.h"
 
@@ -25,4 +26,7 @@ protected:
 	float GroundSpeed;
 	UPROPERTY(BlueprintReadOnly)
 	bool IsFalling;
+
+	UPROPERTY(BlueprintReadOnly)
+	ECharacterState CharacterState;
 };
