@@ -51,7 +51,7 @@ void ASlashCharacter::BeginPlay()
 
 void ASlashCharacter::Move(const FInputActionValue& Value)
 {
-	if (ActionState == EActionState::EAS_Attacking)
+	if (ActionState != EActionState::EAS_Unoccupied)
 	{
 		return;
 	}
@@ -79,10 +79,13 @@ void ASlashCharacter::Rotate(const FInputActionValue& Value)
 
 void ASlashCharacter::EKeyPressed(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Display, TEXT("ASlashCharacter::EKeyPressed"));
 	if (AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem))
 	{
 		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		OverlappingItem = nullptr;
+		EquippedWeapon = OverlappingWeapon;
 	}
 	else
 	{
@@ -90,11 +93,13 @@ void ASlashCharacter::EKeyPressed(const FInputActionValue& Value)
 		{
 			PlayEquipMontage(FName("Unequip"));
 			CharacterState = ECharacterState::ECS_Unequipped;
+			ActionState = EActionState::EAS_EquippingWeapon;
 		}
 		else if (CanArm())
 		{
 			PlayEquipMontage(FName("Equip"));
 			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+			ActionState = EActionState::EAS_EquippingWeapon;
 		}
 	}
 }
@@ -152,6 +157,28 @@ void ASlashCharacter::AttackEnd()
 	ActionState = EActionState::EAS_Unoccupied;
 }
 
+void ASlashCharacter::Disarm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
+	}
+}
+
+void ASlashCharacter::Arm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+	}
+}
+
+void ASlashCharacter::FinishEquipping()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+	
+}
+
 bool ASlashCharacter::CanAttack() const
 {
 	return ActionState == EActionState::EAS_Unoccupied && CharacterState != ECharacterState::ECS_Unequipped;
@@ -164,7 +191,7 @@ bool ASlashCharacter::CanDisarm() const
 
 bool ASlashCharacter::CanArm() const
 {
-	return ActionState == EActionState::EAS_Unoccupied && CharacterState == ECharacterState::ECS_Unequipped;
+	return ActionState == EActionState::EAS_Unoccupied && CharacterState == ECharacterState::ECS_Unequipped && EquippedWeapon;
 }
 
 void ASlashCharacter::Tick(float DeltaTime)
@@ -180,9 +207,9 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		EnhancedPlayerInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Move);
 		EnhancedPlayerInput->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Rotate);
-		EnhancedPlayerInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Jump);
-		EnhancedPlayerInput->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASlashCharacter::EKeyPressed);
-		EnhancedPlayerInput->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Attack);
+		EnhancedPlayerInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ASlashCharacter::Jump);
+		EnhancedPlayerInput->BindAction(EquipAction, ETriggerEvent::Started, this, &ASlashCharacter::EKeyPressed);
+		EnhancedPlayerInput->BindAction(AttackAction, ETriggerEvent::Started, this, &ASlashCharacter::Attack);
 	}
 }
 

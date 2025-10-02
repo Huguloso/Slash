@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SlashCharacter.generated.h"
 
+class AWeapon;
 class AItem;
 class UGroomComponent;
 class UCameraComponent;
@@ -30,6 +31,16 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+		
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void Disarm();
+	UFUNCTION(BlueprintCallable)
+	void Arm();
+	UFUNCTION(BlueprintCallable)
+	void FinishEquipping();
 
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
@@ -38,9 +49,6 @@ protected:
 
 	void PlayAttackMontage();
 	void PlayEquipMontage(FName SectionName);
-	
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
 	
 	bool CanAttack() const;
 	bool CanDisarm() const;
@@ -90,4 +98,7 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<AItem> OverlappingItem;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	TObjectPtr<AWeapon> EquippedWeapon;
 };
