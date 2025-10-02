@@ -37,12 +37,15 @@ protected:
 	void Attack(const FInputActionValue& Value);
 
 	void PlayAttackMontage();
+	void PlayEquipMontage(FName SectionName);
 	
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 	
 	bool CanAttack() const;
-	
+	bool CanDisarm() const;
+	bool CanArm() const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> InputMappingContext;
 
@@ -81,6 +84,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	TObjectPtr<UAnimMontage> EquipMontage;
 
 	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<AItem> OverlappingItem;
