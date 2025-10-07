@@ -1,6 +1,7 @@
 #include "Enemies/Enemy.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Slash/DebugMacros.h"
 
 AEnemy::AEnemy()
@@ -31,9 +32,39 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit(const FVector& ImpactPoint)
 {
-	DRAW_SPHERE(ImpactPoint);
+	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
+	const FVector ToHit = FVector(ImpactLowered - GetActorLocation()).GetSafeNormal();
+	
+	const FVector Front = FVector(GetActorForwardVector()).GetSafeNormal();
+	const FVector Right = FVector(GetActorRightVector()).GetSafeNormal();
+	const FVector Left = -Right;
+	const FVector Back = -Front;
 
-	PlayHitReactMontage(FName("FromLeft"));
+	const float FrontAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Front, ToHit)));
+	const float RightAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Right, ToHit)));
+	const float LeftAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Left, ToHit)));
+	const float BackAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Back, ToHit)));
+
+	FName SectionName;
+	
+	if (FrontAngle >= -45.f && FrontAngle <= 45.f)
+	{
+		SectionName = FName("FromFront");
+	}
+	else if (RightAngle >= -45.f && RightAngle <= 45.f)
+	{
+		SectionName = FName("FromRight");
+	}
+	else if (LeftAngle >= -45.f && LeftAngle <= 45.f)
+	{
+		SectionName = FName("FromLeft");
+	}
+	else if (BackAngle >= -45.f && BackAngle <= 45.f)
+	{
+		SectionName = FName("FromBack");
+	}
+	
+	PlayHitReactMontage(SectionName);
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
