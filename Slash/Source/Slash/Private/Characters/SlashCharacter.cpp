@@ -149,7 +149,7 @@ void ASlashCharacter::PlayAttackMontage()
 	}
 }
 
-void ASlashCharacter::PlayEquipMontage(FName SectionName)
+void ASlashCharacter::PlayEquipMontage(const FName& SectionName)
 {
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{

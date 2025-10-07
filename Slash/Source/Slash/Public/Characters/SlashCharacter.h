@@ -51,7 +51,7 @@ protected:
 	void Attack(const FInputActionValue& Value);
 
 	void PlayAttackMontage();
-	void PlayEquipMontage(FName SectionName);
+	void PlayEquipMontage(const FName& SectionName);
 	
 	bool CanAttack() const;
 	bool CanDisarm() const;
