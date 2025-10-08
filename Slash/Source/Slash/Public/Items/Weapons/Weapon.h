@@ -14,6 +14,7 @@ public:
 	AWeapon();
 	void AttachMeshToSocket(USceneComponent* InParent, FName SocketName);
 	void Equip(USceneComponent* InParent, FName SocketName);
+	void ClearIgnoreActorsArray();
 
 	FORCEINLINE TObjectPtr<UBoxComponent> GetWeaponBox() const { return WeaponBoxComponent; }
 protected:
@@ -37,4 +38,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> BoxTraceEnd;
+	
+	TArray<TObjectPtr<AActor>> IgnoreActors;
 };

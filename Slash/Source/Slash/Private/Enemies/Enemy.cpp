@@ -1,8 +1,7 @@
 #include "Enemies/Enemy.h"
 
 #include "Components/CapsuleComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Slash/DebugMacros.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemy::AEnemy()
 {
@@ -30,7 +29,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemy::GetHit(const FVector& ImpactPoint)
+void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 {
 	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
 	const FVector ToHit = FVector(ImpactLowered - GetActorLocation()).GetSafeNormal();
@@ -65,6 +64,16 @@ void AEnemy::GetHit(const FVector& ImpactPoint)
 	}
 	
 	PlayHitReactMontage(SectionName);
+}
+
+void AEnemy::GetHit(const FVector& ImpactPoint)
+{
+	DirectionalHitReact(ImpactPoint);
+
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
