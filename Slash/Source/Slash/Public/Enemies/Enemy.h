@@ -21,12 +21,17 @@ public:
 	virtual void GetHit(const FVector& ImpactPoint) override;
 
 	void PlayHitReactMontage(const FName& SectionName);
+	
 protected:
 	virtual void BeginPlay() override;
+	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	
 	UPROPERTY(EditAnywhere, Category = "Sounds")
 	TObjectPtr<USoundBase> HitSound;
+
+	UPROPERTY(EditAnywhere, Category = "VisualEffects")
+	TObjectPtr<UParticleSystem> HitParticle;
 };
