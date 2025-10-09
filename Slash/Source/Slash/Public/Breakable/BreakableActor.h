@@ -5,6 +5,8 @@
 #include "Interfaces/HitInterface.h"
 #include "BreakableActor.generated.h"
 
+class ATreasure;
+
 UCLASS()
 class SLASH_API ABreakableActor : public AActor, public IHitInterface
 {
@@ -24,4 +26,7 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollectionComponent;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ATreasure> TreasureClass;
 };
