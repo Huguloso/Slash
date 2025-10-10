@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UNiagaraComponent;
 class USphereComponent;
 
 enum class EItemState : uint8
@@ -41,6 +42,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UNiagaraComponent> EmbersEffect;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Amplitude = 0.25f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
