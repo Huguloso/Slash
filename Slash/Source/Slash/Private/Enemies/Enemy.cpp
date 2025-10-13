@@ -24,11 +24,6 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetHealthPercent(.1f);
-	}
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -43,7 +38,17 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 float AEnemy::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,AActor* DamageCauser)
 {
-	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (AttributeComponent)
+	{
+		AttributeComponent->ReceiveDamage(Damage);
+			
+		if (HealthBarWidget)
+		{
+			HealthBarWidget->SetHealthPercent(AttributeComponent->GetHealthPercent());
+		}
+	}
+
+	return Damage;
 }
 
 void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
