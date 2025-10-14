@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/CharacterTypes.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
@@ -25,12 +26,16 @@ public:
 	void DirectionalHitReact(const FVector& ImpactPoint);
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
-
-	void PlayHitReactMontage(const FName& SectionName);
 	
 protected:
 	virtual void BeginPlay() override;
 
+	void Die();
+	
+	void PlayHitReactMontage(const FName& SectionName);
+
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> AttributeComponent;
@@ -40,6 +45,9 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+	
+		UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	TObjectPtr<UAnimMontage> DeathMontage;
 	
 	UPROPERTY(EditAnywhere, Category = "Sounds")
 	TObjectPtr<USoundBase> HitSound;
