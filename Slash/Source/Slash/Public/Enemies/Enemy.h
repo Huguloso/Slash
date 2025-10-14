@@ -8,6 +8,7 @@
 
 class UHealthBarComponent;
 class UAttributeComponent;
+class AAIController;
 
 UCLASS()
 class SLASH_API AEnemy : public ACharacter, public IHitInterface
@@ -34,24 +35,46 @@ protected:
 	
 	void PlayHitReactMontage(const FName& SectionName);
 
+	bool InTargetRange(const AActor* Target, double Radius) const;
+	
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> AttributeComponent;
-
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	
-		UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> DeathMontage;
 	
 	UPROPERTY(EditAnywhere, Category = "Sounds")
 	TObjectPtr<USoundBase> HitSound;
-
+	
 	UPROPERTY(EditAnywhere, Category = "VisualEffects")
 	TObjectPtr<UParticleSystem> HitParticle;
+
+	UPROPERTY(EditAnywhere)
+	double CombatRadius = 750;
+	
+	UPROPERTY(EditAnywhere)
+	double PatrolRadius = 200;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TObjectPtr<AActor> CurrentPatrolTarget;
+	
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<TObjectPtr<AActor>> PatrolTargets;
+
+	UPROPERTY()
+	TObjectPtr<AAIController> AIController;
+
+	UPROPERTY()
+	TObjectPtr<AActor> CombatTarget;
+
 };
