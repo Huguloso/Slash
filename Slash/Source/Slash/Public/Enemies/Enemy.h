@@ -1,20 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/BaseCharacter.h"
 #include "Characters/CharacterTypes.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
 struct FAIStimulus;
 class UAISenseConfig_Sight;
 class UAIPerceptionComponent;
 class UHealthBarComponent;
-class UAttributeComponent;
 class AAIController;
 
 UCLASS()
-class SLASH_API AEnemy : public ACharacter, public IHitInterface
+class SLASH_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -27,16 +25,12 @@ public:
 
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,AActor* DamageCauser) override;
 
-	void DirectionalHitReact(const FVector& ImpactPoint) const;
-
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 	
 protected:
 	virtual void BeginPlay() override;
 
-	void Die();
-	
-	void PlayHitReactMontage(const FName& SectionName) const;
+	virtual void Die() override;
 
 	bool InTargetRange(const AActor* Target, double Radius) const;
 	
@@ -57,9 +51,6 @@ private:
 	void CheckPatrolTarget();
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAttributeComponent> AttributeComponent;
-	
-	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget;
 	
 	UPROPERTY(VisibleAnywhere)
@@ -67,18 +58,6 @@ private:
  
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Montages")
-	TObjectPtr<UAnimMontage> HitReactMontage;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Montages")
-	TObjectPtr<UAnimMontage> DeathMontage;
-	
-	UPROPERTY(EditAnywhere, Category = "Sounds")
-	TObjectPtr<USoundBase> HitSound;
-	
-	UPROPERTY(EditAnywhere, Category = "VisualEffects")
-	TObjectPtr<UParticleSystem> HitParticle;
 
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 750;
