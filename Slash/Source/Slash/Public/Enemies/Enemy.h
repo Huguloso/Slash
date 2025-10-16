@@ -84,6 +84,9 @@ private:
 	double CombatRadius = 750;
 	
 	UPROPERTY(EditAnywhere)
+	double AttackRadius = 150;
+	
+	UPROPERTY(EditAnywhere)
 	double PatrolRadius = 200;
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")

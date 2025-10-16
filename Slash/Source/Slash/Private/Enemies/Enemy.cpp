@@ -146,6 +146,9 @@ float AEnemy::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AControl
 	}
 
 	CombatTarget = EventInstigator->GetPawn();
+	EnemyState = EEnemyState::EES_Chasing;
+	GetCharacterMovement()->MaxWalkSpeed = 300;
+	MoveToTarget(CombatTarget);
 	return Damage;
 }
 
@@ -279,11 +282,15 @@ void AEnemy::PawnSeen(AActor* Actor, FAIStimulus Stimulus)
 	{
 		if (Actor->ActorHasTag(FName("SlashCharacter")))
 		{
-			EnemyState = EEnemyState::EES_Chasing;
 			GetWorldTimerManager().ClearTimer(PatrolTimer);
 			GetCharacterMovement()->MaxWalkSpeed = 300;
 			CombatTarget = Actor;
-			MoveToTarget(CombatTarget);
+
+			if (EnemyState != EEnemyState::EES_Attacking)
+			{
+				EnemyState = EEnemyState::EES_Chasing;
+				MoveToTarget(CombatTarget);
+			}
 		}
 	}
 }
@@ -301,6 +308,16 @@ void AEnemy::CheckCombatTarget()
 		EnemyState = EEnemyState::EES_Patrolling;
 		GetCharacterMovement()->MaxWalkSpeed = 125;
 		MoveToTarget(CurrentPatrolTarget);
+	}
+	else if (!InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+		GetCharacterMovement()->MaxWalkSpeed = 300;
+		MoveToTarget(CombatTarget);
+	}
+	else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
+	{
+		EnemyState = EEnemyState::EES_Attacking;
 	}
 }
 
