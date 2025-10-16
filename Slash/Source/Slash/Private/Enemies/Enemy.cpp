@@ -7,6 +7,8 @@
 #include "HUD/HealthBarComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 AEnemy::AEnemy()
 {
@@ -27,6 +29,20 @@ AEnemy::AEnemy()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
+
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AI Perception Component"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
+
+	SightConfig->SightRadius = 4000.f;
+	SightConfig->LoseSightRadius = 4200.f;
+	SightConfig->PeripheralVisionAngleDegrees = 45.f;
+
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+
+	AIPerceptionComponent->SetDominantSense(*SightConfig->GetSenseImplementation());
+	AIPerceptionComponent->ConfigureSense(*SightConfig);
 }
 
 void AEnemy::BeginPlay()
@@ -40,20 +56,11 @@ void AEnemy::BeginPlay()
 
 	AIController = Cast<AAIController>(GetController());
 
-	if (AIController && CurrentPatrolTarget)
+	MoveToTarget(CurrentPatrolTarget);
+
+	if (AIPerceptionComponent)
 	{
-		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalActor(CurrentPatrolTarget);
-		MoveRequest.SetAcceptanceRadius(15);
-		FNavPathSharedPtr NavPath;
-		AIController->MoveTo(MoveRequest, &NavPath);
-		TArray<FNavPathPoint>& PathPoints= NavPath->GetPathPoints();
-		for (FNavPathPoint& PathPoint : PathPoints)
-		{
-			const FVector& Location = PathPoint.Location;
-			DrawDebugSphere(GetWorld(), Location, 10, 20, FColor::Green, false, 10);
-		}
-		
+		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemy::PawnSeen);
 	}
 }
 
@@ -111,34 +118,13 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CombatTarget)
+	if (EnemyState == EEnemyState::EES_Attacking || EnemyState == EEnemyState::EES_Chasing)
 	{
-		if (!InTargetRange(CombatTarget, CombatRadius))
-		{
-			CombatTarget = nullptr;
-			if (HealthBarWidget)
-			{
-				HealthBarWidget->SetVisibility(false);
-			}
-		}
+		CheckCombatTarget();
 	}
-
-	if (AIController && CurrentPatrolTarget)
+	else if (EnemyState == EEnemyState::EES_Patrolling)
 	{
-		TArray<AActor*> ValidTargets = PatrolTargets;
-		ValidTargets.Remove(CurrentPatrolTarget);
-		
-		if (InTargetRange(CurrentPatrolTarget, PatrolRadius) && ValidTargets.Num() > 0)
-		{
-			const int32 Selection = FMath::RandRange(0, ValidTargets.Num() - 1);
-			CurrentPatrolTarget = ValidTargets[Selection];
-			FAIMoveRequest MoveRequest;
-			
-			MoveRequest.SetGoalActor(CurrentPatrolTarget);
-			MoveRequest.SetAcceptanceRadius(15);
-			
-			AIController->MoveTo(MoveRequest);
-		}
+		CheckPatrolTarget();
 	}
 }
 
@@ -163,7 +149,7 @@ float AEnemy::TakeDamage(float Damage, const FDamageEvent& DamageEvent, AControl
 	return Damage;
 }
 
-void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
+void AEnemy::DirectionalHitReact(const FVector& ImpactPoint) const
 {
 	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
 	const FVector ToHit = FVector(ImpactLowered - GetActorLocation()).GetSafeNormal();
@@ -227,7 +213,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 	}
 }
 
-void AEnemy::PlayHitReactMontage(const FName& SectionName)
+void AEnemy::PlayHitReactMontage(const FName& SectionName) const
 {
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
@@ -241,7 +227,91 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName)
 
 bool AEnemy::InTargetRange(const AActor* Target, const double Radius) const
 {
+	if (Target == nullptr)
+	{
+		return false;
+	}
+	
 	const double Distance = FVector::Dist(Target->GetActorLocation(), GetActorLocation());
 	return Distance <= Radius;
+}
+
+void AEnemy::PatrolTimerFinished() const
+{
+	MoveToTarget(CurrentPatrolTarget);
+}
+
+void AEnemy::MoveToTarget(AActor* Target) const
+{
+	if (AIController == nullptr || Target == nullptr)
+	{
+		return;
+	}
+	
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(15);
+	AIController->MoveTo(MoveRequest);
+}
+
+AActor* AEnemy::ChoosePatrolTarget() const
+{
+	TArray<AActor*> ValidTargets = PatrolTargets;
+	ValidTargets.Remove(CurrentPatrolTarget);
+		
+	if (ValidTargets.Num() > 0)
+	{
+		const int32 Selection = FMath::RandRange(0, ValidTargets.Num() - 1);
+		return ValidTargets[Selection];
+	}
+
+	return nullptr;
+}
+
+void AEnemy::PawnSeen(AActor* Actor, FAIStimulus Stimulus)
+{
+	if (EnemyState == EEnemyState::EES_Chasing)
+	{
+		return;
+	}
+	
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		if (Actor->ActorHasTag(FName("SlashCharacter")))
+		{
+			EnemyState = EEnemyState::EES_Chasing;
+			GetWorldTimerManager().ClearTimer(PatrolTimer);
+			GetCharacterMovement()->MaxWalkSpeed = 300;
+			CombatTarget = Actor;
+			MoveToTarget(CombatTarget);
+		}
+	}
+}
+
+void AEnemy::CheckCombatTarget()
+{
+	if (!InTargetRange(CombatTarget, CombatRadius))
+	{
+		CombatTarget = nullptr;
+		if (HealthBarWidget)
+		{
+			HealthBarWidget->SetVisibility(false);
+		}
+		
+		EnemyState = EEnemyState::EES_Patrolling;
+		GetCharacterMovement()->MaxWalkSpeed = 125;
+		MoveToTarget(CurrentPatrolTarget);
+	}
+}
+
+void AEnemy::CheckPatrolTarget()
+{
+	if (InTargetRange(CurrentPatrolTarget, PatrolRadius))
+	{
+		CurrentPatrolTarget = ChoosePatrolTarget();
+
+		const double WaitTime = FMath::RandRange(WaitMin, WaitMax);
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolTimerFinished, WaitTime);
+	}
 }
 
