@@ -17,7 +17,7 @@ class SLASH_API ABaseCharacter : public ACharacter, public IHitInterface
 public:
 	ABaseCharacter();
 
-	virtual void Tick(float DeltaTime) override;\
+	virtual void Tick(float DeltaTime) override;
 	
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);

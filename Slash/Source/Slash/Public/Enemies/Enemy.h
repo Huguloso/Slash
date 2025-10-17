@@ -20,7 +20,9 @@ public:
 	AEnemy();
 
 	virtual void Tick(float DeltaTime) override;
-
+	
+	virtual void Destroyed() override;
+	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,AActor* DamageCauser) override;
@@ -59,6 +61,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<AWeapon> WeaponClass;
+	
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 750;
 	
