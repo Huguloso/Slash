@@ -42,6 +42,10 @@ protected:
 
 	AActor* ChoosePatrolTarget() const;
 
+	virtual void Attack(const FInputActionValue& Value) override;
+
+	virtual void PlayAttackMontage() override;
+
 	UFUNCTION()
 	void PawnSeen(AActor* Actor, FAIStimulus Stimulus);
 	
@@ -68,7 +72,7 @@ private:
 	double CombatRadius = 750;
 	
 	UPROPERTY(EditAnywhere)
-	double AttackRadius = 150;
+	double AttackRadius = 130;
 	
 	UPROPERTY(EditAnywhere)
 	double PatrolRadius = 200;
