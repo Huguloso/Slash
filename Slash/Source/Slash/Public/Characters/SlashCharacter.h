@@ -42,7 +42,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 	void EKeyPressed(const FInputActionValue& Value);
-	virtual void Attack(const FInputActionValue& Value) override;
+	virtual void Attack() override;
 
 	virtual void PlayAttackMontage() override;
 	void PlayEquipMontage(const FName& SectionName);

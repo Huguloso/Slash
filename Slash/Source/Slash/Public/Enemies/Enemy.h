@@ -22,8 +22,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void Destroyed() override;
-	
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator,AActor* DamageCauser) override;
 
@@ -34,6 +32,13 @@ protected:
 
 	virtual void Die() override;
 
+	virtual bool CanAttack() const override;
+	virtual void HandleDamage(float DamageAmount) override;
+	
+	virtual void Attack() override;
+
+	virtual void PlayAttackMontage() override;
+	
 	bool InTargetRange(const AActor* Target, double Radius) const;
 	
 	void PatrolTimerFinished() const;
@@ -42,19 +47,34 @@ protected:
 
 	AActor* ChoosePatrolTarget() const;
 
-	virtual void Attack(const FInputActionValue& Value) override;
-
-	virtual void PlayAttackMontage() override;
-
 	UFUNCTION()
 	void PawnSeen(AActor* Actor, FAIStimulus Stimulus);
 	
 	UPROPERTY(BlueprintReadOnly)
-	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+	EDeathPose DeathPose;
 
+	UPROPERTY(BlueprintReadOnly)
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+	
 private:
 	void CheckCombatTarget();
 	void CheckPatrolTarget();
+
+	void HideHealthBar();
+	void ShowHealthBar();
+	void LoseInterest();
+	void StartPatrolling();
+	void ChaseTarget();
+	bool IsOutsideCombatRadius() const;
+	bool IsOutsideAttackRadius() const;
+	bool IsInsideAttackRadius() const;
+	bool IsChasing() const;
+	bool IsAttacking() const;
+	bool IsDead() const;
+	bool IsEngaged() const;
+	void ClearPatrolTimer();
+	void StartAttackTimer();
+	void ClearAttackTimer();
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget;
@@ -67,6 +87,13 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TSubclassOf<AWeapon> WeaponClass;
+
+	FTimerHandle AttackTimer;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackMin = 0.5f;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackMax = 1;
 	
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 750;
@@ -76,6 +103,8 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	double PatrolRadius = 200;
+
+	FTimerHandle PatrolTimer;
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TObjectPtr<AActor> CurrentPatrolTarget;
@@ -88,13 +117,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	double WaitMax = 8;
 
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float PatrollingSpeed = 125;
+	
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float ChasingSpeed = 300;
+	
 	UPROPERTY()
 	TObjectPtr<AAIController> AIController;
 
 	UPROPERTY()
 	TObjectPtr<AActor> CombatTarget;
-	
-	FTimerHandle PatrolTimer;
-
-	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 };

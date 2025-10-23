@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
 #include "BaseCharacter.generated.h"
@@ -25,13 +24,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Attack(const FInputActionValue& Value);
+	virtual void Attack();
 
 	virtual void PlayAttackMontage();
-
 	virtual bool CanAttack() const;
-
 	virtual void Die();
+
+	virtual void HandleDamage(float DamageAmount);
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
@@ -39,7 +38,12 @@ protected:
 	void PlayHitReactMontage(const FName& SectionName) const;
 
 	void DirectionalHitReact(const FVector& ImpactPoint) const;
-		
+
+	bool IsAlive() const;
+
+	void PlayHitSound(const FVector& ImpactPoint);
+	void PlayHitParticles(const FVector& ImpactPoint);
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> AttributeComponent;
 
@@ -54,7 +58,7 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	TObjectPtr<UAnimMontage> HitReactMontage;
-		
+private:
 	UPROPERTY(EditAnywhere, Category = "Sounds")
 	TObjectPtr<USoundBase> HitSound;
 	

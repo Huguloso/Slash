@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GroomComponent.h"
-#include "Components/BoxComponent.h"
 #include "Items/Weapons/Weapon.h"
 
 ASlashCharacter::ASlashCharacter()
@@ -107,9 +106,9 @@ void ASlashCharacter::EKeyPressed(const FInputActionValue& Value)
 	}
 }
 
-void ASlashCharacter::Attack(const FInputActionValue& Value)
+void ASlashCharacter::Attack()
 {
-	Super::Attack(Value);
+	Super::Attack();
 	if (CanAttack())
 	{
 		PlayAttackMontage();
